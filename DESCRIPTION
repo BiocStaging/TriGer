@@ -1,0 +1,23 @@
+Package: TriGer
+Type: Package
+Title: Structured Cross-Omics Interaction Discovery with a Triple-Graph Model
+Version: 0.1.0
+Authors@R: person("Jiaao", "Yu", email = "jy2941@umd.edu", role = c("aut", "cre"))
+Description: Detects modules of features that are densely associated across two
+    omics layers and coherent within each layer. Dense cross-omics blocks are
+    found by greedy peeling of the cross-omics association matrix, and large
+    blocks are refined by greedy peeling of the within-omics correlation
+    matrices. Plotting functions show the detected modules alongside the
+    within-omics correlation structure.
+License: MIT + file LICENSE
+URL: https://github.com/jy2941/TriGer-R
+BugReports: https://github.com/jy2941/TriGer-R/issues
+Encoding: UTF-8
+Imports:
+    graphics,
+    grDevices
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
