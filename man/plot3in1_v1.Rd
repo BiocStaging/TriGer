@@ -25,7 +25,8 @@ plot3in1_v1(
 \item{XY}{Cross-omics matrix (X features in rows).}
 
 \item{result}{A list of blocks, each with X indices first and Y indices
-second, as returned by \code{\link[=greedy_3step]{greedy_3step()}} or \code{\link[=greedy_peeling_XY_all]{greedy_peeling_XY_all()}}.}
+second, as returned by \code{\link[=greedy_3step]{greedy_3step()}} or \code{\link[=greedy_peeling_XY_all]{greedy_peeling_XY_all()}},
+or the \code{modules} element returned by \code{\link[=triger]{triger()}}.}
 
 \item{line}{Draw a box around each block.}
 
@@ -55,12 +56,18 @@ a 5.6 x 4.2 inch device matches the default layout.
 }
 \examples{
 set.seed(1)
-N <- 150; m <- 80; n <- 60
+N <- 150
+m <- 80
+n <- 60
 f <- rnorm(N)
-X <- matrix(rnorm(N * m), N); Y <- matrix(rnorm(N * n), N)
-X[, 1:25] <- X[, 1:25] + 1.5 * f; Y[, 1:20] <- Y[, 1:20] + 1.5 * f
-R <- cor(cbind(X, Y)); P <- abs(R); diag(P) <- 0
+X <- matrix(rnorm(N * m), N)
+Y <- matrix(rnorm(N * n), N)
+X[, 1:25] <- X[, 1:25] + 1.5 * f
+Y[, 1:20] <- Y[, 1:20] + 1.5 * f
+R <- cor(cbind(X, Y))
+P <- abs(R)
+diag(P) <- 0
 modules <- greedy_3step(P, R, m, n, 1.1, 1.8, 1.8)
 plot3in1_v1(R[1:m, 1:m], R[m + 1:n, m + 1:n], R[1:m, m + 1:n], modules,
-            line = TRUE, step = c(10, 5))
+    line = TRUE, step = c(10, 5))
 }

@@ -10,20 +10,25 @@ greedy_peeling_XY_one(Wp, lam)
 \item{Wp}{Non-negative matrix of cross-omics associations (X features in
 rows, Y features in columns), for example -log10 p-values.}
 
-\item{lam}{Size penalty in [1, 2]. Higher values give smaller, denser blocks.}
+\item{lam}{Size penalty, typically in [1, 2]. Higher values give smaller,
+denser blocks.}
 }
 \value{
-A list with \code{density}, \code{X} (row indices) and \code{Y} (column indices).
+A list with \code{density} (the penalized density of the block), \code{X}
+(row indices) and \code{Y} (column indices).
 }
 \description{
 Greedily removes the X feature (row) or Y feature (column) with the
-weakest remaining association and keeps the intermediate submatrix with the
-highest penalized density, \verb{sum / (|X| * |Y|)^(lam / 2)}.
+weakest remaining association and keeps the intermediate submatrix with
+the highest penalized density, \verb{sum / (|X| * |Y|)^(lam / 2)}. A row is
+removed when its sum, scaled by the current ratio \verb{|X| / |Y|}, is at most
+the smallest column sum; otherwise a column is removed.
 }
 \examples{
 set.seed(1)
 W <- matrix(runif(60 * 80, 0, 0.5), 60, 80)
 W[6:20, 11:30] <- W[6:20, 11:30] + 4
 blk <- greedy_peeling_XY_one(W, 1.5)
-range(blk$X); range(blk$Y)
+range(blk$X)
+range(blk$Y)
 }

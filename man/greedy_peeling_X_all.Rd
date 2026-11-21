@@ -4,15 +4,22 @@
 \alias{greedy_peeling_X_all}
 \title{Peel dense communities from a within-omics matrix repeatedly}
 \usage{
-greedy_peeling_X_all(Wp, lam)
+greedy_peeling_X_all(Wp, lam, min_size = 1)
 }
 \arguments{
-\item{Wp}{Symmetric matrix of within-omics associations.}
+\item{Wp}{Symmetric matrix of within-omics associations, for example
+signed correlations.}
 
-\item{lam}{Size penalty in [1, 2]. Higher values give smaller, denser blocks.}
+\item{lam}{Size penalty, typically in [1, 2]. Higher values give smaller,
+denser blocks.}
+
+\item{min_size}{Smallest community returned. Communities with fewer
+features are peeled but not returned. The default, 1, returns every
+community.}
 }
 \value{
-A list of communities, each \code{list(X, density)}.
+A list of communities, each \code{list(X, density)}, with indices into
+the rows of \code{Wp}.
 }
 \description{
 Applies \code{\link[=greedy_peeling_X_one]{greedy_peeling_X_one()}} repeatedly, removing each accepted

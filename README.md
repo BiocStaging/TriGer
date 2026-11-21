@@ -10,9 +10,19 @@ within-omics correlation matrices.
 
 ## Installation
 
+The package is being submitted to Bioconductor. Install the development
+version from GitHub:
+
 ```r
 # install.packages("remotes")
-remotes::install_github("jy2941/TriGer-R")
+remotes::install_github("MATRIX-Research-Lab/TriGer")
+```
+
+After acceptance, install it with:
+
+```r
+# install.packages("BiocManager")
+BiocManager::install("TriGer")
 ```
 
 ## Quick start
@@ -20,25 +30,32 @@ remotes::install_github("jy2941/TriGer-R")
 ```r
 library(TriGer)
 
-# X: samples x m features, Y: samples x n features
-N <- nrow(X); m <- ncol(X); n <- ncol(Y)
-R <- cor(cbind(X, Y))                                  # signed correlations
-t <- R * sqrt((N - 2) / pmax(1 - R^2, 1e-12))
-P <- -log10(2 * pt(abs(t), N - 2, lower.tail = FALSE))  # -log10 p
-diag(P) <- 0
+# x: samples x m features, y: samples x n features (matrices or data frames),
+# or two SummarizedExperiment objects with features in rows
+res <- triger(x, y, lambda1 = 1.1, lambda2 = 1.8, lambda3 = 1.8,
+    X_size = c(10, 15), Y_size = c(10, 250))
 
-modules <- greedy_3step(P, R, m, n, lambda1 = 1.1, lambda2 = 1.8, lambda3 = 1.8,
-                        X_size = c(10, 15), Y_size = c(10, 250))
-sapply(modules, function(b) c(X = length(b$X), Y = length(b$Y)))
+# Module sizes and feature names
+sapply(res$modules, function(b) c(X = length(b$X), Y = length(b$Y)))
+res$modules[[1]]$X_names
 
-plot3in1_v1(R[1:m, 1:m], R[m + 1:n, m + 1:n], R[1:m, m + 1:n], modules, line = TRUE)
+# Cross- and within-omics correlations of the module features
+m <- res$m
+n <- res$n
+plot3in1_v1(res$R[1:m, 1:m], res$R[m + 1:n, m + 1:n], res$R[1:m, m + 1:n],
+    res$modules, line = TRUE)
 ```
+
+`vignette("TriGer")` describes the method and works through a simulated
+example.
 
 ## Functions
 
 | Function | Description |
 |----------|-------------|
-| `greedy_3step()` | Full pipeline: cross-omics block detection, then within-omics refinement of large blocks |
+| `triger()` | Full pipeline on two omics layers (matrices or `SummarizedExperiment`) |
+| `triger_association()` | Signed correlation and -log10 p-value matrices over both layers |
+| `greedy_3step()` | Full pipeline on precomputed association matrices |
 | `greedy_peeling_XY_one()` / `greedy_peeling_XY_all()` | Dense blocks in a cross-omics (X-Y) matrix |
 | `greedy_peeling_X_one()` / `greedy_peeling_X_all()` | Dense communities in a within-omics (symmetric) matrix |
 | `sort_result()` / `sort_result_XandY()` | Order features within each block |
@@ -47,11 +64,13 @@ plot3in1_v1(R[1:m, 1:m], R[m + 1:n, m + 1:n], R[1:m, m + 1:n], modules, line = T
 
 `lambda1` is the cross-omics size penalty and `lambda2` / `lambda3` are the
 within-omics penalties for X and Y (λ₀, λ₁, λ₂ in the paper); higher values give
-smaller, denser blocks.
+smaller, denser blocks. `max_blocks` is the maximum number of blocks found in
+the cross-omics step (default 5). The CRC and IBD analyses of the paper, run
+with the MATLAB code, correspond to `max_blocks = 4`.
 
 ## Related
 
-- Python package: [TriGer-PyPI](https://github.com/jy2941/TriGer-PyPI)
+- Python package: [TriGer-PyPI](https://github.com/MATRIX-Research-Lab/TriGer-PyPI)
 - Code for the paper's simulations and analyses: [TriGer](https://github.com/jy2941/TriGer)
 
 ## License

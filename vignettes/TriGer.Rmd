@@ -1,0 +1,225 @@
+---
+title: "Detecting cross-omics modules with TriGer"
+author:
+- name: Jiaao Yu
+- name: Huang Lin
+  email: huanglinfrederick@gmail.com
+package: TriGer
+output:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Detecting cross-omics modules with TriGer}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Introduction
+
+TriGer detects modules of features that are densely associated across two
+omics layers measured on the same samples, for example gene expression and
+metabolite abundance. A module is a set of X features (first layer) and a set
+of Y features (second layer) such that the cross-omics associations between
+the two sets are strong and each set is coherent within its own layer. The
+method uses three matrices, the three graphs of the triple-graph model:
+
+- **X-X**: the within-omics correlation matrix of the X features,
+- **Y-Y**: the within-omics correlation matrix of the Y features,
+- **X-Y**: the cross-omics association matrix, by default the -log10
+    p-values of the X-Y correlations.
+
+For a non-negative X-Y matrix \(W\), a row set \(A\) and a column set \(B\),
+the penalized density of the submatrix is
+
+\[
+d_\lambda(A, B) =
+    \frac{\sum_{i \in A, j \in B} W_{ij}}{(|A|\,|B|)^{\lambda / 2}},
+\]
+
+and for a symmetric within-omics matrix \(S\) and a feature set \(A\) it is
+\(\sum_{i, j \in A} S_{ij} / |A|^{\lambda}\). The size penalty \(\lambda\),
+typically between 1 and 2, controls the size of the detected sets: higher
+values give smaller, denser sets.
+
+TriGer finds modules in three steps:
+
+1. **Cross-omics peeling.** Starting from the full X-Y matrix, features are
+    removed one at a time, each time the X or Y feature with the smallest
+    remaining association sum, and the intermediate submatrix with the largest
+    penalized density (penalty \(\lambda_1\)) is retained as a block. Its
+    features are removed and the procedure is repeated on the remaining
+    features while the block density exceeds that of the full matrix.
+2. **Within-omics refinement of X.** When a block contains more X features
+    than a specified maximum, its X features are partitioned by the same
+    peeling procedure applied to their signed X-X correlations (penalty
+    \(\lambda_2\)). The X side of the block is replaced by the communities
+    found, each ordered by the within-community sums.
+3. **Within-omics refinement of Y.** The same refinement is applied to the Y
+    side with the Y-Y correlations (penalty \(\lambda_3\)).
+
+The method is described in the accompanying paper, *Structured cross-omics
+interaction discovery with a triple-graph model*.
+
+# Installation
+
+```{r install, eval = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
+BiocManager::install("TriGer")
+```
+
+```{r load, message = FALSE}
+library(TriGer)
+library(SummarizedExperiment)
+```
+
+# Simulated data
+
+We simulate 120 samples with 200 genes and 80 metabolites. Two modules share
+latent factors across the layers:
+
+- Module 1: genes 1-20 depend on a factor \(f_1\) and genes 21-40 on a factor
+    \(f_2\); metabolites 1-15 depend on \(f_1 + f_2\). The genes of this module
+    therefore form two within-omics communities that are both associated with
+    the same metabolites.
+- Module 2: genes 41-60 and metabolites 16-25 depend on a factor \(f_3\).
+
+All other features are independent noise.
+
+```{r simulate}
+set.seed(2026)
+N <- 120
+m <- 200
+n <- 80
+f1 <- rnorm(N)
+f2 <- rnorm(N)
+f3 <- rnorm(N)
+genes <- matrix(rnorm(N * m), N)
+mets <- matrix(rnorm(N * n), N)
+genes[, 1:20] <- genes[, 1:20] + f1
+genes[, 21:40] <- genes[, 21:40] + f2
+mets[, 1:15] <- mets[, 1:15] + 0.7 * (f1 + f2)
+genes[, 41:60] <- genes[, 41:60] + 0.8 * f3
+mets[, 16:25] <- mets[, 16:25] + 0.8 * f3
+dimnames(genes) <- list(paste0("sample", seq_len(N)),
+    paste0("gene", seq_len(m)))
+dimnames(mets) <- list(paste0("sample", seq_len(N)),
+    paste0("met", seq_len(n)))
+```
+
+Omics data in Bioconductor are usually stored in `SummarizedExperiment`
+objects, with features in rows and samples in columns.
+
+```{r se}
+se_genes <- SummarizedExperiment(assays = list(expression = t(genes)))
+se_mets <- SummarizedExperiment(assays = list(abundance = t(mets)))
+se_genes
+```
+
+# Detecting modules
+
+`triger()` accepts two `SummarizedExperiment` objects or two numeric matrices
+with samples in rows. When both layers carry sample names, the samples are
+matched by name. `X_size` and `Y_size` give, for each side, the minimum
+number of features a block must exceed to be kept and the number of features
+above which that side is refined.
+
+```{r triger}
+res <- triger(se_genes, se_mets, lambda1 = 1.3, lambda2 = 1.5,
+    lambda3 = 1.5, X_size = c(5, 30), Y_size = c(5, 30))
+length(res$modules)
+vapply(res$modules, function(b) c(X = length(b$X), Y = length(b$Y)),
+    numeric(2))
+```
+
+Each module contains the indices and names of its features and the penalized
+density of the step-1 block.
+
+```{r module}
+mod <- res$modules[[1]]
+head(mod$X_names)
+mod$Y_names
+```
+
+The first step-1 block contained more than 30 genes, so its X side was
+refined. Grouping its genes by the simulated factor shows the two
+within-omics communities, which appear one after the other in `mod$X`:
+
+```{r communities}
+truth <- cut(mod$X, c(0, 20, 40, 60, m), labels = c("f1", "f2", "f3",
+    "noise"))
+rle(as.character(truth))
+```
+
+The second module recovers genes 41-60 and most of metabolites 16-25:
+
+```{r module2}
+range(res$modules[[2]]$X)
+res$modules[[2]]$Y
+```
+
+# Visualization
+
+`plot3in1_v1()` shows the cross-omics correlations of the module features as
+a square heatmap, with the within-omics correlations of the same features as
+triangles above (X) and to the right (Y). The red boxes mark the modules.
+
+```{r plot, fig.width = 5.6, fig.height = 4.2}
+R <- res$R
+x_idx <- seq_len(res$m)
+y_idx <- res$m + seq_len(res$n)
+plot3in1_v1(R[x_idx, x_idx], R[y_idx, y_idx], R[x_idx, y_idx],
+    res$modules, line = TRUE, step = c(10, 5), bar = TRUE,
+    cbar_pos = "right")
+```
+
+# Choosing the size penalties
+
+Higher penalties give smaller, denser blocks. Typical values are 1.1-1.6 for
+the cross-omics penalty \(\lambda_1\) and 1.4-1.9 for the within-omics
+penalties \(\lambda_2\) and \(\lambda_3\). With correlation matrices, a single
+feature has within-omics density 1, so a large within-omics penalty can split
+a small block into single features; these are discarded (argument
+`min_community_size` of `greedy_3step()`), and if no community remains the
+side is kept unrefined.
+
+```{r penalty}
+sizes <- vapply(c(1.1, 1.3, 1.5), function(l1) {
+    r <- triger(se_genes, se_mets, lambda1 = l1, lambda2 = 1.5,
+        lambda3 = 1.5, X_size = c(5, 30), Y_size = c(5, 30))
+    b <- r$modules[[1]]
+    c(lambda1 = l1, X = length(b$X), Y = length(b$Y))
+}, numeric(3))
+sizes
+```
+
+# Lower-level functions
+
+The steps of TriGer are also available separately, which is useful when the
+association matrices are computed by other means, for example from partial
+correlations or after covariate adjustment.
+
+- `triger_association()` computes the signed correlation matrix `R` and the
+    -log10 p-value matrix `P` over the features of both layers.
+- `greedy_3step()` runs the three steps on precomputed `P` and `R`.
+- `greedy_peeling_XY_one()` and `greedy_peeling_XY_all()` peel blocks from a
+    cross-omics matrix; `greedy_peeling_X_one()` and `greedy_peeling_X_all()`
+    peel communities from a within-omics matrix.
+- `sort_result()` and `sort_result_XandY()` order the features within blocks.
+
+```{r lowlevel}
+assoc <- triger_association(genes, mets)
+blocks <- greedy_peeling_XY_all(assoc$P[x_idx, y_idx], lam = 1.3)
+vapply(blocks, function(b) c(X = length(b$X), Y = length(b$Y)), numeric(2))
+```
+
+# Session information
+
+```{r session}
+sessionInfo()
+```

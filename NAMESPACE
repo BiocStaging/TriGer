@@ -10,13 +10,17 @@ export(plot3in1_v1)
 export(plot_all_result)
 export(sort_result)
 export(sort_result_XandY)
+export(triger)
+export(triger_association)
 importFrom(grDevices,rgb)
-importFrom(graphics,axis)
-importFrom(graphics,box)
-importFrom(graphics,image)
-importFrom(graphics,layout)
-importFrom(graphics,par)
-importFrom(graphics,plot.new)
-importFrom(graphics,plot.window)
-importFrom(graphics,polygon)
-importFrom(graphics,rect)
+importFrom(graphics,
+  axis,
+  box,
+  image,
+  layout,
+  par,
+  plot.new,
+  plot.window,
+  polygon,
+  rect
+)

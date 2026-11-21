@@ -3,4 +3,7 @@
 .RData
 *.tar.gz
 *.Rcheck/
+*.BiocCheck/
 .DS_Store
+vignettes/*.html
+inst/doc

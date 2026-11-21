@@ -4,22 +4,25 @@
 \alias{greedy_peeling_XY_all}
 \title{Peel dense blocks from a cross-omics matrix repeatedly}
 \usage{
-greedy_peeling_XY_all(XY, lam = 1.5, max_round = 5)
+greedy_peeling_XY_all(XY, lam = 1.5, max_blocks = 5)
 }
 \arguments{
 \item{XY}{Non-negative cross-omics association matrix.}
 
-\item{lam}{Size penalty in [1, 2]. Higher values give smaller, denser blocks.}
+\item{lam}{Size penalty, typically in [1, 2]. Higher values give smaller,
+denser blocks.}
 
-\item{max_round}{Number of rounds; at most \code{max_round - 1} blocks are returned.}
+\item{max_blocks}{Maximum number of blocks returned.}
 }
 \value{
-A list of blocks, each \code{list(X, Y, density)} with indices into \code{XY}.
+A list of blocks, each \code{list(X, Y, density)}, with indices into
+the rows (\code{X}) and columns (\code{Y}) of \code{XY}.
 }
 \description{
-Applies \code{\link[=greedy_peeling_XY_one]{greedy_peeling_XY_one()}} repeatedly, removing each accepted block
-before the next round. A block is accepted while its penalized density
-exceeds that of the full matrix.
+Applies \code{\link[=greedy_peeling_XY_one]{greedy_peeling_XY_one()}} repeatedly, removing the rows and
+columns of each accepted block before the next round. A block is accepted
+while its penalized density exceeds that of the full matrix, up to
+\code{max_blocks} blocks.
 }
 \examples{
 set.seed(1)

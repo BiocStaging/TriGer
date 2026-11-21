@@ -23,9 +23,9 @@ Invisibly, the plotted matrix.
 }
 \description{
 Shows \code{Wp} reordered so that the features of the detected blocks come
-first. With \code{full = TRUE} the whole matrix is shown with one box around the
-selected region; otherwise only the selected region is shown, with one box
-per block.
+first. With \code{full = TRUE} the whole matrix is shown with one box around
+the selected region; otherwise only the selected region is shown, with one
+box per block.
 }
 \examples{
 set.seed(1)

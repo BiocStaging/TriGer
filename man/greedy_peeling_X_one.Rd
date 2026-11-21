@@ -7,9 +7,11 @@
 greedy_peeling_X_one(Wp, lam)
 }
 \arguments{
-\item{Wp}{Symmetric matrix of within-omics associations.}
+\item{Wp}{Symmetric matrix of within-omics associations, for example
+signed correlations.}
 
-\item{lam}{Size penalty in [1, 2]. Higher values give smaller, denser blocks.}
+\item{lam}{Size penalty, typically in [1, 2]. Higher values give smaller,
+denser blocks.}
 }
 \value{
 A list with \code{density} and \code{X} (indices of the community).

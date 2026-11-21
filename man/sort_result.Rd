@@ -25,12 +25,15 @@ sort_result_XandY(X, Y, blocks)
 }
 \description{
 \code{sort_result()} orders the features of each block by their within-block
-sums in \code{Wp}. \code{sort_result_XandY()} orders X features by their sums within
-\code{X[blk$X, blk$X]} and Y features by their sums within \code{Y[blk$Y, blk$Y]}.
+sums in \code{Wp}; for a cross-omics \code{Wp}, rows and columns are ordered by the
+absolute values of their sums. \code{sort_result_XandY()} orders X features by
+their sums within \code{X[blk$X, blk$X]} and Y features by their sums within
+\code{Y[blk$Y, blk$Y]}.
 }
 \examples{
 set.seed(1)
 W <- matrix(runif(60 * 80, 0, 0.5), 60, 80)
 W[6:20, 11:30] <- W[6:20, 11:30] + 4
 blocks <- sort_result(W, greedy_peeling_XY_all(W, 1.5))
+head(blocks[[1]]$X)
 }

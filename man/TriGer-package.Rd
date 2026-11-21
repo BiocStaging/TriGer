@@ -6,18 +6,24 @@
 \alias{TriGer-package}
 \title{TriGer: Structured Cross-Omics Interaction Discovery with a Triple-Graph Model}
 \description{
-Detects modules of features that are densely associated across two omics layers and coherent within each layer. Dense cross-omics blocks are found by greedy peeling of the cross-omics association matrix, and large blocks are refined by greedy peeling of the within-omics correlation matrices. Plotting functions show the detected modules alongside the within-omics correlation structure.
+Detects modules of features that are densely associated across two omics layers and coherent within each layer. Dense cross-omics blocks are found by greedy peeling of the cross-omics association matrix, and large blocks are refined by greedy peeling of the within-omics correlation matrices. Input can be numeric matrices or SummarizedExperiment objects. Plotting functions show the detected modules alongside the within-omics correlation structure.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/jy2941/TriGer-R}
-  \item Report bugs at \url{https://github.com/jy2941/TriGer-R/issues}
+  \item \url{https://github.com/MATRIX-Research-Lab/TriGer}
+  \item Report bugs at \url{https://github.com/MATRIX-Research-Lab/TriGer/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Jiaao Yu \email{jy2941@umd.edu}
+\strong{Maintainer}: Huang Lin \email{huanglinfrederick@gmail.com} (\href{https://orcid.org/0000-0002-4892-7871}{ORCID})
+
+Authors:
+\itemize{
+  \item Huang Lin \email{huanglinfrederick@gmail.com} (\href{https://orcid.org/0000-0002-4892-7871}{ORCID})
+  \item Jiaao Yu \email{jy2941@umd.edu}
+}
 
 }
 \keyword{internal}

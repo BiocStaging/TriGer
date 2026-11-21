@@ -2,7 +2,7 @@
 % Please edit documentation in R/peeling.R
 \name{greedy_3step}
 \alias{greedy_3step}
-\title{Detect cross-omics modules with TriGer}
+\title{Detect cross-omics modules from association matrices}
 \usage{
 greedy_3step(
   P,
@@ -16,7 +16,7 @@ greedy_3step(
   Y_size = c(10, 200),
   min_community_size = 2,
   keep_unrefined_if_empty = TRUE,
-  max_round = 5
+  max_blocks = 5
 )
 }
 \arguments{
@@ -29,40 +29,53 @@ features, used for refinement.}
 
 \item{m, n}{Numbers of X and Y features.}
 
-\item{lambda1}{Cross-omics size penalty.}
+\item{lambda1}{Cross-omics size penalty (step 1).}
 
-\item{lambda2, lambda3}{Within-omics size penalties for X and Y.}
+\item{lambda2, lambda3}{Within-omics size penalties for X and Y (steps 2
+and 3).}
 
 \item{X_size, Y_size}{\code{c(min, max)}: blocks with \code{min} or fewer features on
-either side are dropped, and sides with more than \code{max} features are refined.}
+either side are dropped, and sides with more than \code{max} features are
+refined.}
 
-\item{min_community_size}{Smallest within-omics community kept during refinement.}
+\item{min_community_size}{Smallest within-omics community kept during
+refinement.}
 
 \item{keep_unrefined_if_empty}{If refinement keeps no community, keep that
 side of the block unrefined (\code{TRUE}) or empty it (\code{FALSE}).}
 
-\item{max_round}{Passed to \code{\link[=greedy_peeling_XY_all]{greedy_peeling_XY_all()}}.}
+\item{max_blocks}{Maximum number of blocks found in step 1.}
 }
 \value{
-A list of modules, each \code{list(X, Y, density)}, with \code{X} in \code{1:m}
-and \code{Y} in \code{1:n}.
+A list of modules, each \code{list(X, Y, density)}, with \code{X} in \code{1:m},
+\code{Y} in \code{1:n}, and \code{density} the penalized density of the step-1 block
+before refinement.
 }
 \description{
-The full TriGer pipeline. Step 1 peels dense blocks from the cross-omics
-part of \code{P} with \code{\link[=greedy_peeling_XY_all]{greedy_peeling_XY_all()}}. Blocks with too few X or Y
-features are dropped. In steps 2 and 3, the X and Y sides of blocks larger
-than \code{X_size[2]} or \code{Y_size[2]} are refined by within-omics peeling of the
-signed correlations in \code{R}, keeping communities with at least
-\code{min_community_size} features.
+The TriGer pipeline on precomputed matrices. Step 1 peels dense blocks
+from the cross-omics part of \code{P} with \code{\link[=greedy_peeling_XY_all]{greedy_peeling_XY_all()}}. Blocks
+with \code{X_size[1]} or fewer X features, or \code{Y_size[1]} or fewer Y features,
+are dropped. In steps 2 and 3, the X and Y sides of blocks with more than
+\code{X_size[2]} or \code{Y_size[2]} features are refined by within-omics peeling of
+the signed correlations in \code{R}: the side is replaced by the communities
+with at least \code{min_community_size} features, each ordered by within-
+community sums. \code{\link[=triger]{triger()}} computes \code{P} and \code{R} from data and calls this
+function.
 }
 \examples{
 set.seed(1)
-N <- 150; m <- 80; n <- 120
+N <- 150
+m <- 80
+n <- 120
 f <- rnorm(N)
-X <- matrix(rnorm(N * m), N); Y <- matrix(rnorm(N * n), N)
-X[, 1:25] <- X[, 1:25] + 1.5 * f; Y[, 1:40] <- Y[, 1:40] + 1.5 * f
+X <- matrix(rnorm(N * m), N)
+Y <- matrix(rnorm(N * n), N)
+X[, 1:25] <- X[, 1:25] + 1.5 * f
+Y[, 1:40] <- Y[, 1:40] + 1.5 * f
 R <- cor(cbind(X, Y))
-P <- abs(R); diag(P) <- 0
-modules <- greedy_3step(P, R, m, n, lambda1 = 1.1, lambda2 = 1.8, lambda3 = 1.8)
+P <- abs(R)
+diag(P) <- 0
+modules <- greedy_3step(P, R, m, n, lambda1 = 1.1, lambda2 = 1.8,
+    lambda3 = 1.8)
 lengths(modules[[1]][c("X", "Y")])
 }
