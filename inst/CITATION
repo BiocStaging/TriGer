@@ -1,0 +1,13 @@
+bibentry(
+    bibtype = "Article",
+    title = paste("Structured cross-omics interaction discovery with a",
+        "triple-graph model"),
+    author = c(
+        person(given = "Jiaao", family = "Yu"),
+        person(given = "Huang", family = "Lin"),
+        person(given = "Shuo", family = "Chen")),
+    journal = "bioRxiv",
+    year = "2026",
+    doi = "10.64898/2026.09.10.749540",
+    url = "https://www.biorxiv.org/content/10.64898/2026.09.10.749540v1"
+)

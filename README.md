@@ -1,5 +1,19 @@
 # TriGer
 
+[![R-CMD-check](https://github.com/MATRIX-Research-Lab/TriGer/actions/workflows/check.yml/badge.svg)](https://github.com/MATRIX-Research-Lab/TriGer/actions/workflows/check.yml)
+[![bioRxiv](https://img.shields.io/badge/bioRxiv-10.64898%2F2026.09.10.749540-b31b1b)](https://doi.org/10.64898/2026.09.10.749540)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
+
+| Platform | Repository | Installation |
+|----------|------------|--------------|
+| R | [MATRIX-Research-Lab/TriGer](https://github.com/MATRIX-Research-Lab/TriGer) (this repository) | `remotes::install_github("MATRIX-Research-Lab/TriGer")` |
+| Python | [MATRIX-Research-Lab/TriGer-PyPI](https://github.com/MATRIX-Research-Lab/TriGer-PyPI) | `pip install triger` |
+| MATLAB | [jy2941/TriGer](https://github.com/jy2941/TriGer) | Clone the repository and add `matlab/methods` and `matlab/visualization` to the MATLAB path |
+
+The R and Python packages give identical results on the same input. The MATLAB
+repository also contains the code for the simulations and the real-data
+analyses of the paper.
+
 R package for **TriGer**, from the paper *Structured cross-omics interaction
 discovery with a triple-graph model*.
 
@@ -68,10 +82,13 @@ smaller, denser blocks. `max_blocks` is the maximum number of blocks found in
 the cross-omics step (default 5). The CRC and IBD analyses of the paper, run
 with the MATLAB code, correspond to `max_blocks = 4`.
 
-## Related
+## Citation
 
-- Python package: [TriGer-PyPI](https://github.com/MATRIX-Research-Lab/TriGer-PyPI)
-- Code for the paper's simulations and analyses: [TriGer](https://github.com/jy2941/TriGer)
+Yu J, Lin H, Chen S (2026). Structured cross-omics interaction discovery with a
+triple-graph model. *bioRxiv*.
+[doi:10.64898/2026.09.10.749540](https://doi.org/10.64898/2026.09.10.749540)
+
+`citation("TriGer")` returns this reference in R.
 
 ## License
 

@@ -14,7 +14,8 @@ Description: Detects modules of features that are densely associated across
     large blocks are refined by greedy peeling of the within-omics
     correlation matrices. Input can be numeric matrices or
     SummarizedExperiment objects. Plotting functions show the detected
-    modules alongside the within-omics correlation structure.
+    modules alongside the within-omics correlation structure. The method is
+    described in Yu, Lin and Chen (2026) <doi:10.64898/2026.09.10.749540>.
 License: MIT + file LICENSE
 Depends: R (>= 4.6.0)
 Imports:

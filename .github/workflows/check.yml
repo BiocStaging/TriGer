@@ -1,10 +1,12 @@
 # R CMD check of TriGer on Linux, macOS and Windows with the current R
 # release, and R CMD check plus BiocCheck in the Bioconductor devel container.
+# BiocCheck skips the support-site check, which depends on the maintainer's
+# profile; run it locally before submission.
 name: R-CMD-check
 
 on:
   push:
-    branches: [devel]
+    branches: [main, devel]
   pull_request:
   workflow_dispatch:
 
@@ -24,7 +26,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -50,7 +52,7 @@ jobs:
     timeout-minutes: 60
     container: bioconductor/bioconductor_docker:devel
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
@@ -75,5 +77,14 @@ jobs:
         run: |
           tarball <- Sys.glob("TriGer_*.tar.gz")
           BiocCheck::BiocCheck(tarball, `new-package` = TRUE,
-              `quit-with-status` = TRUE)
+              `no-check-bioc-help` = TRUE, `quit-with-status` = TRUE)
         shell: Rscript {0}
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: bioc-devel-results
+          path: |
+            TriGer.Rcheck/
+            TriGer.BiocCheck/

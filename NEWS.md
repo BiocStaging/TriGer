@@ -12,6 +12,7 @@
 * Input matrices are checked for non-numeric, missing and infinite values.
 * Tests compare the peeling functions with reference outputs shared with the
   Python package.
+* `citation("TriGer")` returns the reference of the paper.
 
 # TriGer 0.1.0
 
